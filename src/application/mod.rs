@@ -1,0 +1,11 @@
+pub mod catalog;
+pub mod clock;
+pub mod customers;
+pub mod deliveries;
+pub mod error;
+pub mod orders;
+pub mod rentals;
+pub mod reports;
+pub mod sales;
+pub mod stock;
+pub mod unit_of_work;

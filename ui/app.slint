@@ -1,0 +1,2910 @@
+import { LineEdit, ComboBox, ScrollView, AboutSlint, CheckBox, Palette } from "std-widgets.slint";
+
+export struct DashCard {
+    label: string,
+    value: string,
+}
+
+export struct ProductRow {
+    id: string,
+    sku: string,
+    name: string,
+    category: string,
+    sale-price: string,
+    stock: string,
+    status: string,
+}
+
+export struct CategoryRow {
+    id: string,
+    name: string,
+    status: string,
+}
+
+export struct CustomerRow {
+    id: string,
+    name: string,
+    document: string,
+    phone: string,
+    status: string,
+}
+
+export struct MovementRow {
+    occurred: string,
+    kind: string,
+    delta: string,
+    balance: string,
+    reason: string,
+}
+
+export struct OrderRow {
+    id: string,
+    created: string,
+    customer: string,
+    status: string,
+    total: string,
+}
+
+export struct ItemRow {
+    index: int,
+    product: string,
+    quantity: string,
+    unit-price: string,
+    discount: string,
+    total: string,
+}
+
+export struct SaleRow {
+    id: string,
+    number: string,
+    customer: string,
+    status: string,
+    total: string,
+    payment: string,
+}
+
+export struct PaymentRow {
+    occurred: string,
+    method: string,
+    amount: string,
+    notes: string,
+}
+
+export struct BalanceRow {
+    id: string,
+    number: string,
+    customer: string,
+    total: string,
+    balance: string,
+}
+
+export struct RentalItemRow {
+    id: string,
+    name: string,
+    category: string,
+    price: string,
+    total: string,
+    status: string,
+}
+
+export struct RentalRow {
+    id: string,
+    number: string,
+    customer: string,
+    status: string,
+    period: string,
+    total: string,
+    balance: string,
+}
+
+export struct RentalLineRow {
+    index: int,
+    item: string,
+    quantity: string,
+    returned: string,
+    damaged: string,
+    lost: string,
+    outstanding: string,
+}
+
+export struct DraftLineRow {
+    index: int,
+    item-id: string,
+    item: string,
+    quantity: string,
+    price: string,
+    total: string,
+}
+
+export struct DelivererRow {
+    id: string,
+    name: string,
+    phone: string,
+    document: string,
+    status: string,
+}
+
+export struct DeliveryRow {
+    id: string,
+    schedule: string,
+    customer: string,
+    status: string,
+    deliverer: string,
+    fee: string,
+}
+
+export struct ReportRow {
+    c1: string,
+    c2: string,
+    c3: string,
+    c4: string,
+    c5: string,
+}
+
+// ---------- Tema ----------
+global Theme {
+    out property <color> sidebar: #1c2536;
+    out property <color> sidebar-hover: #263146;
+    out property <color> sidebar-text: #c9d2e0;
+    out property <color> sidebar-muted: #7f8a9e;
+
+    out property <color> background: #f3f5fa;
+    out property <color> surface: #ffffff;
+    out property <color> surface-hover: #f7f9fd;
+    out property <color> surface-header: #eef2f8;
+    out property <color> row-hover: #f4f7fd;
+    out property <color> border: #e2e7f0;
+
+    out property <color> text: #1c2433;
+    out property <color> text-muted: #667085;
+    out property <color> text-disabled: #a3acba;
+    out property <color> text-danger: #b42318;
+    out property <color> text-success: #17724a;
+    out property <color> text-warning: #9a5b00;
+
+    out property <color> primary: #3f6ee8;
+    out property <color> primary-hover: #3561d6;
+    out property <color> primary-pressed: #2a50b8;
+    out property <color> primary-soft: #e8effd;
+
+    out property <color> danger: #d92d20;
+    out property <color> danger-hover: #fbdcd9;
+    out property <color> danger-soft: #fdecea;
+
+    out property <color> success: #1d9c64;
+    out property <color> success-soft: #e7f6ee;
+
+    out property <color> warning: #e0a526;
+    out property <color> warning-soft: #fdf3dc;
+
+    out property <color> disabled: #e6e9ef;
+    out property <color> tooltip-bg: #1c2433;
+}
+
+// ---------- Campos de formulário ----------
+// Altura fixa e sem esticamento vertical: evita campos excessivamente altos dentro de layouts.
+
+component FormInput inherits LineEdit {
+    height: 36px;
+    vertical-stretch: 0;
+}
+
+component FormChoice inherits ComboBox {
+    height: 36px;
+    vertical-stretch: 0;
+}
+
+// ---------- Componentes base ----------
+
+component Card inherits Rectangle {
+    background: Theme.surface;
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: Theme.border;
+}
+
+component PageHeader inherits VerticalLayout {
+    in property <string> heading;
+    in property <string> subtitle: "";
+    spacing: 2px;
+
+    Text {
+        text: root.heading;
+        font-size: 24px;
+        font-weight: 700;
+        color: Theme.text;
+    }
+    if root.subtitle != "" : Text {
+        text: root.subtitle;
+        font-size: 13px;
+        color: Theme.text-muted;
+    }
+}
+
+component SectionTitle inherits Text {
+    font-size: 15px;
+    font-weight: 600;
+    color: Theme.text;
+}
+
+component GroupLabel inherits Text {
+    font-size: 11px;
+    font-weight: 600;
+    color: Theme.sidebar-muted;
+}
+
+component FieldLabel inherits Text {
+    font-size: 13px;
+    color: Theme.text-muted;
+}
+
+// Rótulo com ícone de ajuda. Ao passar o mouse, mostra uma dica curta.
+component HelpLabel inherits HorizontalLayout {
+    in property <string> label;
+    in property <string> help;
+    spacing: 6px;
+    height: 18px;
+    vertical-stretch: 0;
+
+    FieldLabel {
+        text: root.label;
+        vertical-alignment: center;
+    }
+
+    Rectangle {
+        width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        border-width: 1px;
+        border-color: Theme.text-muted;
+        background: help-touch.has-hover ? Theme.primary-soft : transparent;
+
+        Text {
+            width: parent.width;
+            height: parent.height;
+            text: "i";
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: Theme.text-muted;
+        }
+
+        help-touch := TouchArea {
+            width: parent.width;
+            height: parent.height;
+            mouse-cursor: pointer;
+        }
+
+        // Balão exibido enquanto o mouse estiver sobre o ícone.
+        if help-touch.has-hover : Rectangle {
+            x: parent.width + 8px;
+            y: -10px;
+            width: 280px;
+            height: tip-text.preferred-height + 20px;
+            z: 10;
+            border-radius: 6px;
+            background: Theme.tooltip-bg;
+
+            tip-text := Text {
+                x: 12px;
+                y: 10px;
+                width: parent.width - 24px;
+                text: root.help;
+                wrap: word-wrap;
+                font-size: 12px;
+                color: #ffffff;
+            }
+        }
+    }
+
+    Rectangle { horizontal-stretch: 1; }
+}
+
+component InfoRow inherits VerticalLayout {
+    in property <string> label;
+    in property <string> value;
+    spacing: 2px;
+
+    FieldLabel { text: root.label; }
+    Text {
+        text: root.value;
+        wrap: word-wrap;
+        color: Theme.text;
+    }
+}
+
+// Botão com largura calculada pelo texto e margem lateral fixa.
+component ActionButton inherits Rectangle {
+    in property <string> text;
+    in property <bool> enabled: true;
+    in property <bool> primary: false;
+    in property <bool> danger: false;
+    callback clicked();
+
+    height: 36px;
+    width: max(96px, label.preferred-width + 36px);
+    vertical-stretch: 0;
+    horizontal-stretch: 0;
+    border-radius: 6px;
+    border-width: root.primary ? 0px : 1px;
+    border-color: root.danger ? Theme.danger : Theme.border;
+    background: !root.enabled ? Theme.disabled
+        : root.primary ? (touch.pressed ? Theme.primary-pressed : (touch.has-hover ? Theme.primary-hover : Theme.primary))
+        : root.danger ? (touch.has-hover ? Theme.danger-hover : Theme.danger-soft)
+        : (touch.has-hover ? Theme.surface-hover : Theme.surface);
+
+    label := Text {
+        x: 18px;
+        y: 0px;
+        width: parent.width - 36px;
+        height: parent.height;
+        text: root.text;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: !root.enabled ? Theme.text-disabled
+            : root.primary ? #ffffff
+            : root.danger ? Theme.text-danger
+            : Theme.text;
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        enabled: root.enabled;
+        clicked => { root.clicked(); }
+    }
+}
+
+// Botão de texto discreto, usado para "Voltar para listagem".
+component LinkButton inherits Rectangle {
+    in property <string> text;
+    callback clicked();
+
+    height: 32px;
+    width: label.preferred-width + 24px;
+    vertical-stretch: 0;
+    horizontal-stretch: 0;
+    border-radius: 6px;
+    background: touch.has-hover ? Theme.surface-header : transparent;
+
+    label := Text {
+        x: 12px;
+        y: 0px;
+        height: parent.height;
+        text: root.text;
+        vertical-alignment: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: Theme.primary;
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.clicked(); }
+    }
+}
+
+component NavItem inherits Rectangle {
+    in property <string> label;
+    in property <bool> active: false;
+    callback clicked();
+
+    height: 36px;
+    border-radius: 8px;
+    background: root.active ? Theme.primary : (touch.has-hover ? Theme.sidebar-hover : transparent);
+
+    Text {
+        x: 14px;
+        width: parent.width - 28px;
+        height: parent.height;
+        text: root.label;
+        vertical-alignment: center;
+        font-size: 14px;
+        font-weight: root.active ? 600 : 400;
+        color: root.active ? #ffffff : Theme.sidebar-text;
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.clicked(); }
+    }
+}
+
+component ListRow inherits Rectangle {
+    in property <bool> selected: false;
+    callback clicked();
+
+    height: 40px;
+    border-radius: 6px;
+    background: root.selected ? Theme.primary-soft : (touch.has-hover ? Theme.row-hover : Theme.surface);
+
+    @children
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.clicked(); }
+    }
+}
+
+component TableHead inherits Rectangle {
+    height: 30px;
+    border-radius: 6px;
+    background: Theme.surface-header;
+
+    @children
+}
+
+component StatCard inherits Card {
+    in property <string> label;
+    in property <string> value;
+    in property <color> accent: Theme.primary;
+    callback clicked();
+
+    min-height: 96px;
+    horizontal-stretch: 1;
+    background: touch.has-hover ? Theme.surface-hover : Theme.surface;
+
+    Rectangle {
+        x: 0px;
+        y: 14px;
+        width: 4px;
+        height: parent.height - 28px;
+        border-radius: 2px;
+        background: root.accent;
+    }
+
+    VerticalLayout {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        padding: 16px;
+        padding-left: 22px;
+        spacing: 6px;
+
+        Text {
+            text: root.label;
+            font-size: 13px;
+            color: Theme.text-muted;
+            wrap: word-wrap;
+        }
+        Text {
+            text: root.value;
+            font-size: 24px;
+            font-weight: 700;
+            color: Theme.text;
+            overflow: elide;
+        }
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.clicked(); }
+    }
+}
+
+// ---------- Janela principal ----------
+
+export component MainWindow inherits Window {
+    title: "Gestão Comercial";
+    preferred-width: 1200px;
+    preferred-height: 780px;
+    min-width: 1000px;
+    min-height: 680px;
+
+    init => {
+        Palette.color-scheme = ColorScheme.light;
+    }
+    background: Theme.background;
+
+    in-out property <string> page: "dashboard";
+    in-out property <string> message: "";
+    in-out property <bool> message-is-error: false;
+
+    // Guia interna de cada módulo: 0 = listagem, 1 = formulário.
+    // Quem troca a guia é o Rust, conforme o resultado da ação (ver app.rs).
+    in-out property <int> product-tab: 0;
+    in-out property <int> customer-tab: 0;
+    in-out property <int> order-tab: 0;
+    in-out property <int> sale-tab: 0;
+    in-out property <int> rental-tab: 0;
+
+    in-out property <[DashCard]> dash-cards: [];
+
+    // ---------- Categorias e produtos ----------
+    in-out property <[string]> category-options: [];
+    in-out property <[CategoryRow]> categories: [];
+    in-out property <string> category-id: "";
+    in-out property <string> category-name: "";
+
+    in-out property <[ProductRow]> products: [];
+    in-out property <string> product-search: "";
+    in-out property <string> product-id: "";
+    in-out property <string> product-sku: "";
+    in-out property <string> product-name: "";
+    in-out property <string> product-description: "";
+    in-out property <string> product-purchase: "";
+    in-out property <string> product-sale: "";
+    in-out property <string> product-min-stock: "0";
+    in-out property <string> product-unit: "un";
+    in-out property <int> product-category-index: 0;
+    in-out property <string> product-stock: "";
+
+    // ---------- Estoque ----------
+    in-out property <[ProductRow]> stock-items: [];
+    in-out property <string> stock-alert: "";
+    in-out property <string> stock-selected-id: "";
+    in-out property <string> stock-selected-label: "Selecione um produto na lista";
+    in-out property <string> stock-amount: "";
+    in-out property <string> stock-reason: "";
+    in-out property <[MovementRow]> movements: [];
+
+    // ---------- Clientes ----------
+    in-out property <[CustomerRow]> customers: [];
+    in-out property <string> customer-search: "";
+    in-out property <string> customer-id: "";
+    in-out property <string> customer-name: "";
+    in-out property <int> customer-person-index: 0;
+    in-out property <string> customer-document: "";
+    in-out property <string> customer-phone: "";
+    in-out property <string> customer-whatsapp: "";
+    in-out property <string> customer-street: "";
+    in-out property <string> customer-neighborhood: "";
+    in-out property <string> customer-city: "";
+    in-out property <string> customer-notes: "";
+
+    // ---------- Listas de apoio ----------
+    in-out property <[string]> customer-options: [];
+    in-out property <[string]> product-options: [];
+
+    // ---------- Pedidos ----------
+    in-out property <[OrderRow]> orders: [];
+    in-out property <string> order-search: "";
+    in-out property <string> order-id: "";
+    in-out property <int> order-customer-index: -1;
+    in-out property <int> order-origin-index: 0;
+    in-out property <int> order-mode-index: 0;
+    in-out property <string> order-street: "";
+    in-out property <string> order-neighborhood: "";
+    in-out property <string> order-city: "";
+    in-out property <string> order-discount: "0,00";
+    in-out property <string> order-notes: "";
+    in-out property <string> order-status: "Novo pedido";
+    in-out property <string> order-totals: "";
+    in-out property <bool> order-editable: true;
+    in-out property <[ItemRow]> order-items: [];
+    in-out property <int> order-item-product-index: -1;
+    in-out property <string> order-item-quantity: "1";
+    in-out property <string> order-item-price: "";
+    in-out property <string> order-item-discount: "0,00";
+
+    // ---------- Vendas ----------
+    in-out property <[SaleRow]> sales: [];
+    in-out property <string> sale-search: "";
+    in-out property <string> sale-id: "";
+    in-out property <string> sale-title: "Selecione uma venda";
+    in-out property <string> sale-totals: "";
+    in-out property <[ItemRow]> sale-items: [];
+    in-out property <[PaymentRow]> sale-payments: [];
+    in-out property <string> sale-cancel-reason: "";
+
+    // ---------- Pagamentos ----------
+    in-out property <[BalanceRow]> balances: [];
+    in-out property <string> pay-sale-id: "";
+    in-out property <string> pay-title: "Selecione uma venda";
+    in-out property <string> pay-summary: "";
+    in-out property <[PaymentRow]> pay-history: [];
+    in-out property <string> pay-amount: "";
+    in-out property <int> pay-method-index: 0;
+    in-out property <string> pay-notes: "";
+
+    // ---------- Itens de locação ----------
+    in-out property <[RentalItemRow]> rental-items: [];
+    in-out property <string> rental-item-id: "";
+    in-out property <string> rental-item-name: "";
+    in-out property <string> rental-item-description: "";
+    in-out property <string> rental-item-category: "";
+    in-out property <string> rental-item-price: "";
+    in-out property <string> rental-item-notes: "";
+    in-out property <string> rental-item-initial: "0";
+    in-out property <string> rental-item-units: "";
+    in-out property <string> rental-item-reason: "";
+
+    // ---------- Locações ----------
+    in-out property <[string]> rental-item-options: [];
+    in-out property <[RentalRow]> rentals: [];
+    in-out property <string> rental-search: "";
+    in-out property <string> rental-id: "";
+    in-out property <string> rental-title: "Nova locação";
+    in-out property <string> rental-summary: "";
+    in-out property <[RentalLineRow]> rental-lines: [];
+    in-out property <[string]> rental-line-options: [];
+    in-out property <int> rental-customer-index: -1;
+    in-out property <string> rental-pickup: "";
+    in-out property <string> rental-expected: "";
+    in-out property <string> rental-discount: "0,00";
+    in-out property <int> rental-draft-item-index: -1;
+    in-out property <string> rental-draft-quantity: "1";
+    in-out property <string> rental-draft-price: "";
+    in-out property <[DraftLineRow]> rental-draft: [];
+    in-out property <string> rental-cancel-reason: "";
+    in-out property <int> rental-return-line-index: -1;
+    in-out property <string> rental-return-returned: "0";
+    in-out property <string> rental-return-damaged: "0";
+    in-out property <string> rental-return-lost: "0";
+    in-out property <string> rental-return-notes: "";
+    in-out property <string> rental-pay-amount: "";
+    in-out property <int> rental-pay-method-index: 0;
+    in-out property <string> rental-pay-notes: "";
+
+    // ---------- Entregadores ----------
+    in-out property <[DelivererRow]> deliverers: [];
+    in-out property <[string]> deliverer-options: [];
+    in-out property <string> deliverer-id: "";
+    in-out property <string> deliverer-name: "";
+    in-out property <string> deliverer-phone: "";
+    in-out property <string> deliverer-document: "";
+    in-out property <string> deliverer-notes: "";
+
+    // ---------- Entregas ----------
+    in-out property <[DeliveryRow]> deliveries: [];
+    in-out property <[DashCard]> delivery-panel: [];
+    in-out property <int> delivery-view-index: 0;
+    in-out property <string> delivery-date: "";
+    in-out property <[string]> delivery-order-options: [];
+    in-out property <int> delivery-new-order-index: -1;
+    in-out property <string> delivery-new-phone: "";
+    in-out property <string> delivery-new-fee: "0,00";
+    in-out property <string> delivery-new-notes: "";
+    in-out property <string> delivery-new-schedule: "";
+    in-out property <string> delivery-id: "";
+    in-out property <string> delivery-title: "Nova entrega";
+    in-out property <string> delivery-details: "";
+    in-out property <[string]> delivery-history: [];
+    in-out property <string> delivery-schedule-text: "";
+    in-out property <int> delivery-deliverer-index: -1;
+    in-out property <string> delivery-received-by: "";
+    in-out property <string> delivery-note: "";
+    in-out property <string> delivery-reason: "";
+
+    // ---------- Relatórios ----------
+    in-out property <[string]> report-kind-options: [];
+    in-out property <int> report-kind-index: 0;
+    in-out property <string> report-from: "";
+    in-out property <string> report-to: "";
+    in-out property <string> report-title: "";
+    in-out property <string> report-summary: "";
+    in-out property <[ReportRow]> report-header: [];
+    in-out property <[ReportRow]> report-rows: [];
+
+    // ---------- Configurações ----------
+    in-out property <string> settings-data-folder: "";
+    in-out property <string> settings-database-file: "";
+    in-out property <string> settings-backups-folder: "";
+    in-out property <string> settings-exports-folder: "";
+    in-out property <string> settings-schema-version: "";
+    in-out property <[string]> settings-backups: [];
+    in-out property <int> settings-backup-index: -1;
+    in-out property <bool> settings-restore-confirmed: false;
+
+    // ---------- Callbacks ----------
+    callback navigate(string);
+    callback new-product();
+    callback search-products();
+    callback select-product(string);
+    callback save-product();
+    callback toggle-product(string);
+    callback new-category();
+    callback select-category(string);
+    callback save-category();
+    callback toggle-category(string);
+    callback select-stock-item(string);
+    callback stock-entry();
+    callback stock-exit();
+    callback stock-adjust();
+    callback new-customer();
+    callback search-customers();
+    callback select-customer(string);
+    callback save-customer();
+    callback toggle-customer(string);
+    callback new-order();
+    callback select-order(string);
+    callback save-order();
+    callback add-order-item();
+    callback remove-order-item(int);
+    callback confirm-order();
+    callback cancel-order();
+    callback search-sales();
+    callback select-sale(string);
+    callback complete-sale();
+    callback cancel-sale();
+    callback select-payment-sale(string);
+    callback register-payment();
+    callback new-rental-item();
+    callback select-rental-item(string);
+    callback save-rental-item();
+    callback toggle-rental-item(string);
+    callback add-rental-units();
+    callback write-off-rental-units();
+    callback new-rental();
+    callback select-rental(string);
+    callback rental-draft-add();
+    callback rental-draft-remove(int);
+    callback rental-create();
+    callback rental-pick-up();
+    callback rental-cancel();
+    callback rental-register-return();
+    callback rental-pay();
+    callback new-deliverer();
+    callback select-deliverer(string);
+    callback save-deliverer();
+    callback toggle-deliverer(string);
+    callback search-deliveries();
+    callback select-delivery(string);
+    callback new-delivery();
+    callback create-delivery();
+    callback schedule-delivery();
+    callback assign-delivery();
+    callback depart-delivery();
+    callback complete-delivery();
+    callback fail-delivery();
+    callback cancel-delivery();
+    callback generate-report();
+    callback export-report();
+    callback create-backup();
+    callback prepare-restore();
+
+    HorizontalLayout {
+        // ---------- Navegação lateral ----------
+        Rectangle {
+            width: 220px;
+            background: Theme.sidebar;
+
+            VerticalLayout {
+                padding: 16px;
+                spacing: 2px;
+
+                Text { text: "Gestão Comercial"; font-size: 18px; font-weight: 700; color: #ffffff; }
+                Text { text: "Controle comercial"; font-size: 12px; color: Theme.sidebar-muted; }
+                Rectangle { height: 16px; }
+
+                GroupLabel { text: "INÍCIO"; }
+                NavItem { label: "Painel"; active: root.page == "dashboard"; clicked => { root.navigate("dashboard"); } }
+                Rectangle { height: 8px; }
+
+                GroupLabel { text: "COMERCIAL"; }
+                NavItem { label: "Pedidos"; active: root.page == "orders"; clicked => { root.navigate("orders"); } }
+                NavItem { label: "Vendas"; active: root.page == "sales"; clicked => { root.navigate("sales"); } }
+                NavItem { label: "Pagamentos"; active: root.page == "payments"; clicked => { root.navigate("payments"); } }
+                NavItem { label: "Clientes"; active: root.page == "customers"; clicked => { root.navigate("customers"); } }
+                Rectangle { height: 8px; }
+
+                GroupLabel { text: "ESTOQUE"; }
+                NavItem { label: "Produtos"; active: root.page == "products"; clicked => { root.navigate("products"); } }
+                NavItem { label: "Categorias"; active: root.page == "categories"; clicked => { root.navigate("categories"); } }
+                NavItem { label: "Estoque"; active: root.page == "stock"; clicked => { root.navigate("stock"); } }
+                Rectangle { height: 8px; }
+
+                GroupLabel { text: "LOCAÇÕES"; }
+                NavItem { label: "Locações"; active: root.page == "rentals"; clicked => { root.navigate("rentals"); } }
+                NavItem { label: "Itens de locação"; active: root.page == "rental-items"; clicked => { root.navigate("rental-items"); } }
+                Rectangle { height: 8px; }
+
+                GroupLabel { text: "LOGÍSTICA"; }
+                NavItem { label: "Entregas"; active: root.page == "deliveries"; clicked => { root.navigate("deliveries"); } }
+                NavItem { label: "Entregadores"; active: root.page == "deliverers"; clicked => { root.navigate("deliverers"); } }
+                Rectangle { height: 8px; }
+
+                GroupLabel { text: "SISTEMA"; }
+                NavItem { label: "Relatórios"; active: root.page == "reports"; clicked => { root.navigate("reports"); } }
+                NavItem { label: "Configurações"; active: root.page == "settings"; clicked => { root.navigate("settings"); } }
+                Rectangle { vertical-stretch: 1; }
+            }
+        }
+
+        // ---------- Área de conteúdo ----------
+        Rectangle {
+            horizontal-stretch: 1;
+            background: Theme.background;
+
+            VerticalLayout {
+                padding: 24px;
+                spacing: 14px;
+
+                // Banner de mensagens: aparece no topo somente quando há texto.
+                Rectangle {
+                    visible: root.message != "";
+                    height: root.message == "" ? 0px : 42px;
+                    border-radius: 8px;
+                    border-width: 1px;
+                    border-color: root.message-is-error ? Theme.danger : Theme.success;
+                    background: root.message-is-error ? Theme.danger-soft : Theme.success-soft;
+
+                    Text {
+                        x: 14px;
+                        width: parent.width - 28px;
+                        height: parent.height;
+                        text: root.message;
+                        wrap: word-wrap;
+                        vertical-alignment: center;
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: root.message-is-error ? Theme.text-danger : Theme.text-success;
+                    }
+                }
+
+                // ================= PAINEL =================
+                if root.page == "dashboard" : ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 14px;
+                        PageHeader { heading: "Painel"; subtitle: "Resumo de vendas, estoque, locações e entregas. Clique em um indicador para abrir a tela correspondente."; }
+
+                        SectionTitle { text: "Financeiro e vendas"; }
+                        HorizontalLayout {
+                            spacing: 12px;
+                            StatCard { label: root.dash-cards[0].label; value: root.dash-cards[0].value; accent: Theme.primary; clicked => { root.navigate("sales"); } }
+                            StatCard { label: root.dash-cards[1].label; value: root.dash-cards[1].value; accent: Theme.primary; clicked => { root.navigate("sales"); } }
+                            StatCard { label: root.dash-cards[2].label; value: root.dash-cards[2].value; accent: Theme.success; clicked => { root.navigate("payments"); } }
+                            StatCard { label: root.dash-cards[3].label; value: root.dash-cards[3].value; accent: Theme.warning; clicked => { root.navigate("payments"); } }
+                        }
+
+                        SectionTitle { text: "Estoque e locações"; }
+                        HorizontalLayout {
+                            spacing: 12px;
+                            StatCard { label: root.dash-cards[4].label; value: root.dash-cards[4].value; accent: Theme.warning; clicked => { root.navigate("stock"); } }
+                            StatCard { label: root.dash-cards[5].label; value: root.dash-cards[5].value; accent: Theme.danger; clicked => { root.navigate("stock"); } }
+                        }
+                        HorizontalLayout {
+                            spacing: 12px;
+                            StatCard { label: root.dash-cards[6].label; value: root.dash-cards[6].value; accent: Theme.primary; clicked => { root.navigate("rentals"); } }
+                            StatCard { label: root.dash-cards[7].label; value: root.dash-cards[7].value; accent: Theme.warning; clicked => { root.navigate("rentals"); } }
+                            StatCard { label: root.dash-cards[8].label; value: root.dash-cards[8].value; accent: Theme.danger; clicked => { root.navigate("rentals"); } }
+                        }
+
+                        SectionTitle { text: "Logística e entregas"; }
+                        HorizontalLayout {
+                            spacing: 12px;
+                            StatCard { label: root.dash-cards[9].label; value: root.dash-cards[9].value; accent: Theme.primary; clicked => { root.navigate("deliveries"); } }
+                            StatCard { label: root.dash-cards[10].label; value: root.dash-cards[10].value; accent: Theme.danger; clicked => { root.navigate("deliveries"); } }
+                            StatCard { label: root.dash-cards[11].label; value: root.dash-cards[11].value; accent: Theme.warning; clicked => { root.navigate("deliveries"); } }
+                        }
+
+                       // AboutSlint { }
+                    }
+                }
+
+                // ================= PRODUTOS =================
+                if root.page == "products" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Produtos"; subtitle: "Cadastro, preços e situação dos produtos"; }
+
+                    if root.product-tab == 0 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            spacing: 10px;
+                            FormInput {
+                                horizontal-stretch: 1;
+                                placeholder-text: "Buscar por nome ou SKU";
+                                text <=> root.product-search;
+                                edited => { root.search-products(); }
+                            }
+                            ActionButton { text: "+ Novo produto"; primary: true; clicked => { root.new-product(); } }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 8px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "SKU"; width: 100px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Nome"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Estoque"; width: 80px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Preço de venda"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.products : ListRow {
+                                            selected: row.id == root.product-id;
+                                            clicked => { root.select-product(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.sku; width: 100px; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.name; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.stock; width: 80px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.sale-price; width: 120px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 120px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.products.length == 0 : Text {
+                                            text: "Nenhum produto encontrado. Clique em \"+ Novo produto\" para começar.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if root.product-tab == 1 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            LinkButton { text: "← Voltar para listagem"; clicked => { root.product-tab = 0; } }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 24px;
+                                    spacing: 14px;
+
+                                    SectionTitle { text: root.product-id == "" ? "Novo produto" : "Editar produto"; font-size: 18px; }
+
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Código (SKU)"; help: "Código curto que identifica o produto. Exemplo: CAD-01 para uma cadeira plástica. Use letras e números, sem espaços."; }
+                                            FormInput { text <=> root.product-sku; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 2;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Nome do produto"; help: "Nome que aparece nos pedidos e vendas. Exemplo: Cadeira plástica branca."; }
+                                            FormInput { text <=> root.product-name; }
+                                        }
+                                    }
+                                    VerticalLayout {
+                                        spacing: 6px;
+                                        HelpLabel { label: "Descrição"; help: "Detalhes opcionais, como cor, material ou medidas. Não aparece nos relatórios."; }
+                                        FormInput { text <=> root.product-description; }
+                                    }
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Categoria"; help: "Grupo ao qual o produto pertence, para facilitar buscas e relatórios. Deixe em \"Sem categoria\" se não quiser agrupar."; }
+                                            FormChoice { model: root.category-options; current-index <=> root.product-category-index; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Unidade de medida"; help: "Como o produto é contado. Exemplos: un (unidade), cx (caixa), kg, m."; }
+                                            FormInput { text <=> root.product-unit; }
+                                        }
+                                    }
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Preço de compra"; help: "Quanto você paga ao fornecedor por unidade. Usado para calcular seu lucro. Exemplo: 10,00."; }
+                                            FormInput { text <=> root.product-purchase; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Preço de venda"; help: "Valor cobrado do cliente por unidade. Exemplo: 25,00. Pode ser alterado no pedido, caso necessário."; }
+                                            FormInput { text <=> root.product-sale; }
+                                        }
+                                    }
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Estoque atual"; help: "Quantidade disponível hoje. Não pode ser editada aqui: use a tela Estoque para entradas, saídas e ajustes, assim tudo fica registrado."; }
+                                            Rectangle {
+                                                height: 36px;
+                                                border-radius: 6px;
+                                                border-width: 1px;
+                                                border-color: Theme.border;
+                                                background: Theme.surface-header;
+                                                Text {
+                                                    x: 10px;
+                                                    width: parent.width - 20px;
+                                                    height: parent.height;
+                                                    vertical-alignment: center;
+                                                    overflow: elide;
+                                                    font-weight: 600;
+                                                    color: Theme.text;
+                                                    text: root.product-id == "" ? "Saldo inicial zero" : root.product-stock;
+                                                }
+                                            }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Estoque mínimo"; help: "Quantidade abaixo da qual o produto aparece como estoque baixo, para você repor a tempo. Exemplo: 5."; }
+                                            FormInput { text <=> root.product-min-stock; }
+                                        }
+                                    }
+
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        ActionButton { text: "Salvar produto"; primary: true; clicked => { root.save-product(); } }
+                                        if root.product-id == "" : ActionButton { text: "Limpar campos"; clicked => { root.new-product(); } }
+                                        if root.product-id != "" : ActionButton { text: "Descartar alterações"; clicked => { root.product-tab = 0; } }
+                                        Rectangle { horizontal-stretch: 1; }
+                                        ActionButton {
+                                            text: "Ativar / desativar";
+                                            enabled: root.product-id != "";
+                                            clicked => { root.toggle-product(root.product-id); }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= CLIENTES =================
+                if root.page == "customers" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Clientes"; subtitle: "Pessoas físicas e jurídicas com contatos e endereço"; }
+
+                    if root.customer-tab == 0 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            spacing: 10px;
+                            FormInput {
+                                horizontal-stretch: 1;
+                                placeholder-text: "Buscar por nome, documento ou telefone";
+                                text <=> root.customer-search;
+                                edited => { root.search-customers(); }
+                            }
+                            ActionButton { text: "+ Novo cliente"; primary: true; clicked => { root.new-customer(); } }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 8px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "Nome"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Documento"; width: 140px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Telefone"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 80px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.customers : ListRow {
+                                            selected: row.id == root.customer-id;
+                                            clicked => { root.select-customer(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.name; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.document; width: 140px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.phone; width: 120px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 80px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.customers.length == 0 : Text {
+                                            text: "Nenhum cliente encontrado. Clique em \"+ Novo cliente\" para começar.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if root.customer-tab == 1 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            LinkButton { text: "← Voltar para listagem"; clicked => { root.customer-tab = 0; } }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 24px;
+                                    spacing: 14px;
+
+                                    SectionTitle { text: root.customer-id == "" ? "Novo cliente" : "Editar cliente"; font-size: 18px; }
+
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 2;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Nome completo ou razão social"; help: "Nome da pessoa ou da empresa como deve aparecer nos pedidos. Exemplo: Ana Paula Lima ou Loja Central Ltda."; }
+                                            FormInput { text <=> root.customer-name; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Tipo de pessoa"; help: "Escolha Pessoa física para CPF e Pessoa jurídica para CNPJ. Isso define qual documento deve ser informado."; }
+                                            FormChoice {
+                                                model: ["Pessoa física", "Pessoa jurídica"];
+                                                current-index <=> root.customer-person-index;
+                                            }
+                                        }
+                                    }
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "CPF ou CNPJ"; help: "Opcional. Só pode haver um cadastro por documento. Exemplo: 529.982.247-25. Use somente números se preferir."; }
+                                            FormInput { text <=> root.customer-document; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Telefone"; help: "Com DDD. Exemplo: (85) 3333-4444. É preciso informar telefone ou WhatsApp."; }
+                                            FormInput { text <=> root.customer-phone; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "WhatsApp"; help: "Número com DDD usado para contato rápido. Exemplo: (85) 99999-8888. Pode ser igual ao telefone."; }
+                                            FormInput { text <=> root.customer-whatsapp; }
+                                        }
+                                    }
+
+                                    SectionTitle { text: "Endereço"; font-size: 14px; }
+                                    HorizontalLayout {
+                                        spacing: 16px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 2;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Logradouro"; help: "Rua, avenida e número. Exemplo: Rua das Flores, 120. Usado como endereço padrão nas entregas."; }
+                                            FormInput { text <=> root.customer-street; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Bairro"; help: "Exemplo: Centro, Meireles."; }
+                                            FormInput { text <=> root.customer-neighborhood; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Cidade"; help: "Exemplo: Fortaleza. Se informar endereço, preencha logradouro, bairro e cidade juntos."; }
+                                            FormInput { text <=> root.customer-city; }
+                                        }
+                                    }
+
+                                    VerticalLayout {
+                                        spacing: 6px;
+                                        HelpLabel { label: "Observações"; help: "Informações internas, como preferências de horário ou instruções de acesso. O cliente não vê este campo."; }
+                                        FormInput { text <=> root.customer-notes; }
+                                    }
+
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        ActionButton { text: "Salvar cliente"; primary: true; clicked => { root.save-customer(); } }
+                                        if root.customer-id == "" : ActionButton { text: "Limpar campos"; clicked => { root.new-customer(); } }
+                                        if root.customer-id != "" : ActionButton { text: "Descartar alterações"; clicked => { root.customer-tab = 0; } }
+                                        Rectangle { horizontal-stretch: 1; }
+                                        ActionButton {
+                                            text: "Ativar / desativar";
+                                            enabled: root.customer-id != "";
+                                            clicked => { root.toggle-customer(root.customer-id); }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= PEDIDOS =================
+                if root.page == "orders" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Pedidos"; subtitle: "Pedidos recebidos e em elaboração. Ao confirmar, o pedido vira venda e o estoque é baixado."; }
+
+                    if root.order-tab == 0 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            spacing: 10px;
+                            Rectangle { horizontal-stretch: 1; }
+                            ActionButton { text: "+ Novo pedido"; primary: true; clicked => { root.new-order(); } }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 8px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "Data"; width: 130px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Cliente"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 160px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Total"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.orders : ListRow {
+                                            selected: row.id == root.order-id;
+                                            clicked => { root.select-order(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.created; width: 130px; vertical-alignment: center; color: Theme.text-muted; font-size: 12px; }
+                                                Text { text: row.customer; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; font-weight: 600; }
+                                                Text { text: row.status; width: 160px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.total; width: 120px; vertical-alignment: center; color: Theme.text; font-weight: 600; }
+                                            }
+                                        }
+                                        if root.orders.length == 0 : Text {
+                                            text: "Nenhum pedido registrado. Clique em \"+ Novo pedido\" para começar.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if root.order-tab == 1 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            LinkButton { text: "← Voltar para listagem"; clicked => { root.order-tab = 0; } }
+                            Rectangle { horizontal-stretch: 1; }
+                            Text {
+                                text: root.order-status;
+                                font-size: 13px;
+                                font-weight: 600;
+                                color: Theme.primary;
+                                vertical-alignment: center;
+                            }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 24px;
+                                    spacing: 16px;
+
+                                    SectionTitle { text: root.order-id == "" ? "Novo pedido" : "Pedido"; font-size: 18px; }
+
+                                    // ---- Etapa 1: dados principais ----
+                                    VerticalLayout {
+                                        spacing: 14px;
+                                        HorizontalLayout {
+                                            spacing: 16px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 2;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Cliente"; help: "Selecione um cliente já cadastrado. Para cadastrar um novo, use a tela Clientes e volte aqui."; }
+                                                FormChoice {
+                                                    model: root.customer-options;
+                                                    current-index <=> root.order-customer-index;
+                                                    enabled: root.order-id == "" && root.order-editable;
+                                                }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Origem do pedido"; help: "De onde veio o pedido: WhatsApp, presencial (no balcão) ou outro canal. Ajuda a medir de onde vêm suas vendas."; }
+                                                FormChoice {
+                                                    model: ["WhatsApp", "Presencial", "Outro"];
+                                                    current-index <=> root.order-origin-index;
+                                                    enabled: root.order-editable;
+                                                }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Como o cliente recebe"; help: "Entrega: levamos até o endereço do cliente. Retirada: o cliente vem buscar no local."; }
+                                                FormChoice {
+                                                    model: ["Entrega", "Retirada"];
+                                                    current-index <=> root.order-mode-index;
+                                                    enabled: root.order-editable;
+                                                }
+                                            }
+                                        }
+
+                                        // Endereço só aparece quando há entrega.
+                                        if root.order-mode-index == 0 : VerticalLayout {
+                                            spacing: 14px;
+                                            SectionTitle { text: "Endereço de entrega"; font-size: 14px; }
+                                            HorizontalLayout {
+                                                spacing: 16px;
+                                                VerticalLayout {
+                                                    horizontal-stretch: 2;
+                                                    spacing: 6px;
+                                                    HelpLabel { label: "Logradouro"; help: "Rua, avenida e número onde a entrega será feita. Se deixar em branco, usamos o endereço do cadastro do cliente."; }
+                                                    FormInput { text <=> root.order-street; enabled: root.order-editable; }
+                                                }
+                                                VerticalLayout {
+                                                    horizontal-stretch: 1;
+                                                    spacing: 6px;
+                                                    HelpLabel { label: "Bairro"; help: "Bairro do endereço de entrega. Exemplo: Meireles."; }
+                                                    FormInput { text <=> root.order-neighborhood; enabled: root.order-editable; }
+                                                }
+                                                VerticalLayout {
+                                                    horizontal-stretch: 1;
+                                                    spacing: 6px;
+                                                    HelpLabel { label: "Cidade"; help: "Cidade do endereço de entrega. Exemplo: Fortaleza."; }
+                                                    FormInput { text <=> root.order-city; enabled: root.order-editable; }
+                                                }
+                                            }
+                                        }
+
+                                        HorizontalLayout {
+                                            spacing: 16px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Desconto no pedido"; help: "Desconto em reais aplicado sobre o total dos itens. Exemplo: 10,00. Deixe 0,00 se não houver. Só é possível após incluir itens."; }
+                                                FormInput { text <=> root.order-discount; enabled: root.order-editable; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 2;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Observações"; help: "Combinados com o cliente, como horário ou forma de pagamento. Exemplo: Entregar após as 14h."; }
+                                                FormInput { text <=> root.order-notes; enabled: root.order-editable; }
+                                            }
+                                        }
+
+                                        HorizontalLayout {
+                                            spacing: 10px;
+                                            ActionButton {
+                                                text: root.order-id == "" ? "Continuar para itens" : "Salvar alterações";
+                                                primary: true;
+                                                enabled: root.order-editable;
+                                                clicked => { root.save-order(); }
+                                            }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+                                    }
+
+                                    // ---- Etapa 2: itens (só após o cabeçalho ser salvo) ----
+                                    if root.order-id != "" : VerticalLayout {
+                                        spacing: 14px;
+                                        Rectangle { height: 1px; background: Theme.border; }
+                                        SectionTitle { text: "Itens do pedido"; font-size: 14px; }
+
+                                        if root.order-items.length == 0 : Text {
+                                            text: "Nenhum item incluído ainda. Escolha um produto abaixo.";
+                                            color: Theme.text-muted;
+                                            font-size: 13px;
+                                        }
+
+                                        for item in root.order-items : HorizontalLayout {
+                                            spacing: 10px;
+                                            Text { text: item.product; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: item.quantity + " x " + item.unit-price; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: "desc. " + item.discount; font-size: 12px; vertical-alignment: center; color: Theme.text-muted; }
+                                            Text { text: item.total; font-weight: 600; vertical-alignment: center; color: Theme.text; }
+                                            ActionButton {
+                                                text: "Remover";
+                                                danger: true;
+                                                enabled: root.order-editable;
+                                                clicked => { root.remove-order-item(item.index); }
+                                            }
+                                        }
+
+                                        HorizontalLayout {
+                                            spacing: 16px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 3;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Produto"; help: "Escolha um produto cadastrado. O preço de venda é preenchido automaticamente."; }
+                                                FormChoice {
+                                                    model: root.product-options;
+                                                    current-index <=> root.order-item-product-index;
+                                                    enabled: root.order-editable;
+                                                }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Quantidade"; help: "Quantas unidades o cliente está levando. Exemplo: 2."; }
+                                                FormInput { text <=> root.order-item-quantity; enabled: root.order-editable; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Preço unitário"; help: "Deixe em branco para usar o preço de venda do cadastro. Preencha só se o valor for negociado."; }
+                                                FormInput { text <=> root.order-item-price; enabled: root.order-editable; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Desconto do item"; help: "Desconto em reais só para este item. Exemplo: 5,00. Deixe 0,00 se não houver."; }
+                                                FormInput { text <=> root.order-item-discount; enabled: root.order-editable; }
+                                            }
+                                        }
+                                        HorizontalLayout {
+                                            spacing: 10px;
+                                            ActionButton {
+                                                text: "Adicionar item";
+                                                primary: true;
+                                                enabled: root.order-editable;
+                                                clicked => { root.add-order-item(); }
+                                            }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+
+                                        Rectangle {
+                                            min-height: 52px;
+                                            border-radius: 8px;
+                                            background: Theme.surface-header;
+                                            Text {
+                                                x: 14px;
+                                                width: parent.width - 28px;
+                                                height: parent.height;
+                                                vertical-alignment: center;
+                                                wrap: word-wrap;
+                                                font-size: 14px;
+                                                color: Theme.text;
+                                                text: root.order-totals;
+                                            }
+                                        }
+
+                                        HorizontalLayout {
+                                            spacing: 10px;
+                                            ActionButton {
+                                                text: "Confirmar pedido e gerar venda";
+                                                primary: true;
+                                                enabled: root.order-editable;
+                                                clicked => { root.confirm-order(); }
+                                            }
+                                            ActionButton {
+                                                text: "Cancelar pedido";
+                                                danger: true;
+                                                enabled: root.order-editable;
+                                                clicked => { root.cancel-order(); }
+                                            }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+                                    }
+
+                                    if root.order-id == "" : Text {
+                                        text: "Preencha os dados acima e clique em \"Continuar para itens\" para adicionar os produtos.";
+                                        font-size: 13px;
+                                        color: Theme.text-muted;
+                                        wrap: word-wrap;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= VENDAS =================
+                if root.page == "sales" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Vendas"; subtitle: "Vendas confirmadas, pagamentos e cancelamentos"; }
+
+                    if root.sale-tab == 0 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            spacing: 10px;
+                            FormInput {
+                                horizontal-stretch: 1;
+                                placeholder-text: "Número exato da venda, ex.: V-2026-0001";
+                                text <=> root.sale-search;
+                            }
+                            ActionButton { text: "Buscar"; clicked => { root.search-sales(); } }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 8px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "Venda"; width: 130px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Cliente"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Total"; width: 110px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Pagamento"; width: 110px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.sales : ListRow {
+                                            selected: row.id == root.sale-id;
+                                            clicked => { root.select-sale(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.number; width: 130px; vertical-alignment: center; color: Theme.text; font-weight: 600; }
+                                                Text { text: row.customer; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 120px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.total; width: 110px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.payment; width: 110px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.sales.length == 0 : Text {
+                                            text: "Nenhuma venda encontrada. As vendas aparecem aqui depois que um pedido é confirmado.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if root.sale-tab == 1 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            LinkButton { text: "← Voltar para listagem"; clicked => { root.sale-tab = 0; } }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 24px;
+                                    spacing: 14px;
+                                    SectionTitle { text: root.sale-title; font-size: 18px; wrap: word-wrap; }
+
+                                    Rectangle {
+                                        min-height: 52px;
+                                        border-radius: 8px;
+                                        background: Theme.surface-header;
+                                        Text {
+                                            x: 14px;
+                                            width: parent.width - 28px;
+                                            height: parent.height;
+                                            vertical-alignment: center;
+                                            wrap: word-wrap;
+                                            font-size: 14px;
+                                            color: Theme.text;
+                                            text: root.sale-totals;
+                                        }
+                                    }
+
+                                    SectionTitle { text: "Itens"; font-size: 14px; }
+                                    for item in root.sale-items : HorizontalLayout {
+                                        spacing: 10px;
+                                        Text { text: item.product; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                        Text { text: item.quantity + " x " + item.unit-price; vertical-alignment: center; color: Theme.text; }
+                                        Text { text: item.total; font-weight: 600; vertical-alignment: center; color: Theme.text; }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    SectionTitle { text: "Pagamentos recebidos"; font-size: 14px; }
+                                    if root.sale-payments.length == 0 : Text {
+                                        text: "Nenhum pagamento registrado ainda. Registre recebimentos na tela Pagamentos.";
+                                        font-size: 13px;
+                                        color: Theme.text-muted;
+                                    }
+                                    for payment in root.sale-payments : HorizontalLayout {
+                                        spacing: 10px;
+                                        Text { text: payment.occurred; width: 130px; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: payment.method; width: 130px; color: Theme.text; vertical-alignment: center; }
+                                        Text { text: payment.amount; font-weight: 600; color: Theme.text; vertical-alignment: center; }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    SectionTitle { text: "Ações"; font-size: 14px; }
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        ActionButton {
+                                            text: "Marcar como concluída";
+                                            enabled: root.sale-id != "";
+                                            clicked => { root.complete-sale(); }
+                                        }
+                                        Rectangle { horizontal-stretch: 1; }
+                                    }
+                                    HelpLabel { label: "Motivo do cancelamento"; help: "Explique por que a venda está sendo cancelada. Exemplo: cliente desistiu da compra. O motivo fica registrado."; }
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        FormInput {
+                                            text <=> root.sale-cancel-reason;
+                                            horizontal-stretch: 1;
+                                            enabled: root.sale-id != "";
+                                        }
+                                        ActionButton {
+                                            text: "Cancelar venda";
+                                            danger: true;
+                                            enabled: root.sale-id != "";
+                                            clicked => { root.cancel-sale(); }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= PAGAMENTOS =================
+                if root.page == "payments" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Pagamentos"; subtitle: "Vendas com saldo a receber e registro de recebimentos"; }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        vertical-stretch: 1;
+
+                        Card {
+                            horizontal-stretch: 2;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 10px;
+                                SectionTitle { text: "Vendas com saldo a receber"; font-size: 14px; }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.balances : ListRow {
+                                            height: 58px;
+                                            selected: row.id == root.pay-sale-id;
+                                            clicked => { root.select-payment-sale(row.id); }
+                                            VerticalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                padding-top: 8px;
+                                                spacing: 2px;
+                                                Text { text: row.number + " · " + row.customer; overflow: elide; font-weight: 700; color: Theme.text; }
+                                                Text { text: "Total " + row.total + " · Falta receber " + row.balance; font-size: 12px; color: Theme.text-muted; }
+                                            }
+                                        }
+                                        if root.balances.length == 0 : Text {
+                                            text: "Nenhuma venda com saldo a receber.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Card {
+                            horizontal-stretch: 3;
+                            min-width: 340px;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 20px;
+                                    spacing: 12px;
+                                    SectionTitle { text: root.pay-title; wrap: word-wrap; }
+                                    Rectangle {
+                                        min-height: 52px;
+                                        border-radius: 8px;
+                                        background: Theme.surface-header;
+                                        Text {
+                                            x: 14px;
+                                            width: parent.width - 28px;
+                                            height: parent.height;
+                                            vertical-alignment: center;
+                                            wrap: word-wrap;
+                                            font-size: 13px;
+                                            color: Theme.text;
+                                            text: root.pay-summary;
+                                        }
+                                    }
+
+                                    SectionTitle { text: "Pagamentos registrados"; font-size: 13px; }
+                                    for payment in root.pay-history : HorizontalLayout {
+                                        spacing: 10px;
+                                        Text { text: payment.occurred; width: 130px; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: payment.method; width: 130px; color: Theme.text; vertical-alignment: center; }
+                                        Text { text: payment.amount; font-weight: 600; color: Theme.text; vertical-alignment: center; }
+                                        Text { text: payment.notes; horizontal-stretch: 1; overflow: elide; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    SectionTitle { text: "Registrar recebimento"; font-size: 13px; }
+                                    HorizontalLayout {
+                                        spacing: 14px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Valor recebido"; help: "Quanto o cliente pagou agora. Não pode ser maior que o saldo a receber. Exemplo: 50,00."; }
+                                            FormInput { text <=> root.pay-amount; enabled: root.pay-sale-id != ""; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Forma de pagamento"; help: "Como o cliente pagou: dinheiro, PIX ou cartão. Isso ajuda a conferir o caixa no fim do dia."; }
+                                            FormChoice {
+                                                model: ["Dinheiro", "PIX", "Cartão de crédito", "Cartão de débito"];
+                                                current-index <=> root.pay-method-index;
+                                                enabled: root.pay-sale-id != "";
+                                            }
+                                        }
+                                    }
+                                    VerticalLayout {
+                                        spacing: 6px;
+                                        HelpLabel { label: "Observação"; help: "Opcional. Exemplo: sinal pago na retirada, ou comprovante PIX nº 123."; }
+                                        FormInput { text <=> root.pay-notes; enabled: root.pay-sale-id != ""; }
+                                    }
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        ActionButton {
+                                            text: "Registrar recebimento";
+                                            primary: true;
+                                            enabled: root.pay-sale-id != "";
+                                            clicked => { root.register-payment(); }
+                                        }
+                                        Rectangle { horizontal-stretch: 1; }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= ITENS DE LOCAÇÃO =================
+                if root.page == "rental-items" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Itens de locação"; subtitle: "Mesas, cadeiras e outros itens disponíveis para locação"; }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        vertical-stretch: 1;
+
+                        Card {
+                            horizontal-stretch: 3;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 10px;
+                                HorizontalLayout {
+                                    Rectangle { horizontal-stretch: 1; }
+                                    ActionButton { text: "+ Novo item"; primary: true; clicked => { root.new-rental-item(); } }
+                                }
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "Nome"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Categoria"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Total"; width: 80px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Valor"; width: 90px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 70px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.rental-items : ListRow {
+                                            selected: row.id == root.rental-item-id;
+                                            clicked => { root.select-rental-item(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.name; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.category; width: 120px; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.total; width: 80px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.price; width: 90px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 70px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.rental-items.length == 0 : Text {
+                                            text: "Nenhum item de locação cadastrado.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Card {
+                            horizontal-stretch: 2;
+                            min-width: 300px;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 18px;
+                                    spacing: 8px;
+                                    SectionTitle { text: root.rental-item-id == "" ? "Novo item de locação" : "Editar item de locação"; }
+                                    HelpLabel { label: "Nome"; help: "Nome do item como aparece nas locações. Exemplo: Mesa redonda 1,20 m."; }
+                                    FormInput { text <=> root.rental-item-name; }
+                                    HelpLabel { label: "Categoria"; help: "Grupo do item. Exemplo: Mobiliário, Decoração."; }
+                                    FormInput { text <=> root.rental-item-category; }
+                                    HelpLabel { label: "Descrição"; help: "Detalhes opcionais do item, como cor e material."; }
+                                    FormInput { text <=> root.rental-item-description; }
+                                    HelpLabel { label: "Valor da locação por unidade"; help: "Quanto custa alugar uma unidade por período. Exemplo: 5,00."; }
+                                    FormInput { text <=> root.rental-item-price; }
+                                    HelpLabel { label: "Quantidade total"; help: "Quantas unidades você possui para alugar. Só pode ser definida no cadastro; depois use Estoque de locação."; }
+                                    FormInput { text <=> root.rental-item-initial; enabled: root.rental-item-id == ""; }
+                                    HelpLabel { label: "Observações"; help: "Informações internas sobre o item."; }
+                                    FormInput { text <=> root.rental-item-notes; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        ActionButton { text: "Salvar item"; primary: true; clicked => { root.save-rental-item(); } }
+                                        ActionButton { text: "Limpar campos"; clicked => { root.new-rental-item(); } }
+                                    }
+                                    ActionButton {
+                                        text: "Ativar / desativar";
+                                        enabled: root.rental-item-id != "";
+                                        clicked => { root.toggle-rental-item(root.rental-item-id); }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    SectionTitle { text: "Estoque de locação"; font-size: 13px; }
+                                    HelpLabel { label: "Quantidade"; help: "Unidades a acrescentar (compra) ou dar baixa (perda, quebra). Exemplo: 4."; }
+                                    FormInput { text <=> root.rental-item-units; enabled: root.rental-item-id != ""; }
+                                    HelpLabel { label: "Motivo"; help: "Obrigatório. Exemplo: compra nova, cadeira quebrada na festa."; }
+                                    FormInput { text <=> root.rental-item-reason; enabled: root.rental-item-id != ""; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        ActionButton {
+                                            text: "Adicionar unidades";
+                                            enabled: root.rental-item-id != "";
+                                            clicked => { root.add-rental-units(); }
+                                        }
+                                        ActionButton {
+                                            text: "Dar baixa";
+                                            danger: true;
+                                            enabled: root.rental-item-id != "";
+                                            clicked => { root.write-off-rental-units(); }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= LOCAÇÕES =================
+                if root.page == "rentals" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Locações"; subtitle: "Reservas por período, retiradas, devoluções e pagamentos"; }
+
+                    if root.rental-tab == 0 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            spacing: 10px;
+                            Rectangle { horizontal-stretch: 1; }
+                            ActionButton { text: "+ Nova locação"; primary: true; clicked => { root.new-rental(); } }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 8px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "Locação"; width: 130px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Cliente"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Período"; width: 220px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 110px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Saldo"; width: 100px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.rentals : ListRow {
+                                            selected: row.id == root.rental-id;
+                                            clicked => { root.select-rental(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.number; width: 130px; font-weight: 600; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.customer; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.period; width: 220px; font-size: 12px; overflow: elide; vertical-alignment: center; color: Theme.text-muted; }
+                                                Text { text: row.status; width: 110px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.balance; width: 100px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.rentals.length == 0 : Text {
+                                            text: "Nenhuma locação registrada. Clique em \"+ Nova locação\" para começar.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if root.rental-tab == 1 : VerticalLayout {
+                        vertical-stretch: 1;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            LinkButton { text: "← Voltar para listagem"; clicked => { root.rental-tab = 0; } }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+
+                        Card {
+                            vertical-stretch: 1;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 24px;
+                                    spacing: 16px;
+
+                                    // ---- Nova locação ----
+                                    if root.rental-id == "" : VerticalLayout {
+                                        spacing: 14px;
+                                        SectionTitle { text: "Nova locação"; font-size: 18px; }
+                                        HorizontalLayout {
+                                            spacing: 16px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 2;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Cliente"; help: "Quem está alugando. Cadastre o cliente na tela Clientes se ainda não existir."; }
+                                                FormChoice { model: root.customer-options; current-index <=> root.rental-customer-index; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Desconto"; help: "Desconto em reais sobre o total da locação. Exemplo: 10,00. Deixe 0,00 se não houver."; }
+                                                FormInput { text <=> root.rental-discount; }
+                                            }
+                                        }
+                                        HorizontalLayout {
+                                            spacing: 16px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Retirada"; help: "Data e hora em que o cliente leva os itens. Formato: dd/mm/aaaa hh:mm. Exemplo: 21/11/2026 08:00."; }
+                                                FormInput { text <=> root.rental-pickup; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Devolução prevista"; help: "Data e hora combinadas para devolver. Exemplo: 21/11/2026 20:00. Após este horário, a locação aparece como atrasada se não houver devolução."; }
+                                                FormInput { text <=> root.rental-expected; }
+                                            }
+                                        }
+
+                                        Rectangle { height: 1px; background: Theme.border; }
+                                        SectionTitle { text: "Itens da locação"; font-size: 14px; }
+                                        HorizontalLayout {
+                                            spacing: 16px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 3;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Item"; help: "Escolha o item de locação (mesa, cadeira etc.). A disponibilidade é verificada no período informado."; }
+                                                FormChoice { model: root.rental-item-options; current-index <=> root.rental-draft-item-index; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Quantidade"; help: "Quantas unidades desse item. Exemplo: 30 cadeiras."; }
+                                                FormInput { text <=> root.rental-draft-quantity; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Valor unitário"; help: "Deixe em branco para usar o valor da tabela do item. Preencha só se houver valor negociado."; }
+                                                FormInput { text <=> root.rental-draft-price; }
+                                            }
+                                        }
+                                        HorizontalLayout {
+                                            ActionButton { text: "Adicionar à locação"; primary: true; clicked => { root.rental-draft-add(); } }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+
+                                        for line in root.rental-draft : HorizontalLayout {
+                                            spacing: 10px;
+                                            Text { text: line.item; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: line.quantity + " x " + line.price; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: line.total; font-weight: 600; vertical-alignment: center; color: Theme.text; }
+                                            ActionButton { text: "Remover"; danger: true; clicked => { root.rental-draft-remove(line.index); } }
+                                        }
+
+                                        HorizontalLayout {
+                                            ActionButton { text: "Criar locação"; primary: true; clicked => { root.rental-create(); } }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+                                    }
+
+                                    // ---- Locação existente ----
+                                    if root.rental-id != "" : VerticalLayout {
+                                        spacing: 14px;
+                                        SectionTitle { text: root.rental-title; font-size: 18px; wrap: word-wrap; }
+
+                                        Rectangle {
+                                            min-height: 52px;
+                                            border-radius: 8px;
+                                            background: Theme.surface-header;
+                                            Text {
+                                                x: 14px;
+                                                width: parent.width - 28px;
+                                                height: parent.height;
+                                                vertical-alignment: center;
+                                                wrap: word-wrap;
+                                                font-size: 14px;
+                                                color: Theme.text;
+                                                text: root.rental-summary;
+                                            }
+                                        }
+
+                                        SectionTitle { text: "Itens"; font-size: 14px; }
+                                        for line in root.rental-lines : HorizontalLayout {
+                                            spacing: 10px;
+                                            Text { text: line.item; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: "Locado " + line.quantity; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Devolvidas " + line.returned; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Danificadas " + line.damaged; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Perdidas " + line.lost; font-size: 12px; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Pendentes " + line.outstanding; font-size: 12px; font-weight: 600; color: Theme.text; vertical-alignment: center; }
+                                        }
+
+                                        Rectangle { height: 1px; background: Theme.border; }
+                                        SectionTitle { text: "Retirada"; font-size: 14px; }
+                                        HorizontalLayout {
+                                            spacing: 10px;
+                                            ActionButton { text: "Marcar como retirada"; primary: true; clicked => { root.rental-pick-up(); } }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+
+                                        Rectangle { height: 1px; background: Theme.border; }
+                                        SectionTitle { text: "Devolução"; font-size: 14px; }
+                                        HelpLabel { label: "Linha do item"; help: "Escolha qual item está sendo devolvido, caso a locação tenha mais de um."; }
+                                        FormChoice { model: root.rental-line-options; current-index <=> root.rental-return-line-index; }
+                                        HorizontalLayout {
+                                            spacing: 14px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Devolvidas em bom estado"; help: "Quantidade que voltou sem problemas. Exemplo: 28."; }
+                                                FormInput { text <=> root.rental-return-returned; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Danificadas"; help: "Voltaram, mas com avaria. Ficam disponíveis para locação até você dar baixa."; }
+                                                FormInput { text <=> root.rental-return-damaged; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Perdidas"; help: "Não voltaram. Exemplo: 1. Elas saem do estoque de locação."; }
+                                                FormInput { text <=> root.rental-return-lost; }
+                                            }
+                                        }
+                                        VerticalLayout {
+                                            spacing: 6px;
+                                            HelpLabel { label: "Observações sobre danos"; help: "Descreva a avaria, se houver. Exemplo: pé quebrado na cadeira nº 5."; }
+                                            FormInput { placeholder-text: "Opcional"; text <=> root.rental-return-notes; }
+                                        }
+                                        HorizontalLayout {
+                                            ActionButton { text: "Registrar devolução"; primary: true; clicked => { root.rental-register-return(); } }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+
+                                        Rectangle { height: 1px; background: Theme.border; }
+                                        SectionTitle { text: "Pagamento"; font-size: 14px; }
+                                        HorizontalLayout {
+                                            spacing: 14px;
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Valor recebido"; help: "Quanto o cliente pagou agora. Não pode ser maior que o saldo. Exemplo: 50,00."; }
+                                                FormInput { text <=> root.rental-pay-amount; }
+                                            }
+                                            VerticalLayout {
+                                                horizontal-stretch: 1;
+                                                spacing: 6px;
+                                                HelpLabel { label: "Forma de pagamento"; help: "Como o cliente pagou: dinheiro, PIX ou cartão."; }
+                                                FormChoice {
+                                                    model: ["Dinheiro", "PIX", "Cartão de crédito", "Cartão de débito"];
+                                                    current-index <=> root.rental-pay-method-index;
+                                                }
+                                            }
+                                        }
+                                        HorizontalLayout {
+                                            ActionButton { text: "Registrar pagamento"; primary: true; clicked => { root.rental-pay(); } }
+                                            Rectangle { horizontal-stretch: 1; }
+                                        }
+
+                                        Rectangle { height: 1px; background: Theme.border; }
+                                        SectionTitle { text: "Cancelamento"; font-size: 14px; }
+                                        HelpLabel { label: "Motivo do cancelamento"; help: "Só é possível cancelar uma locação que ainda não foi retirada. Exemplo: cliente desistiu."; }
+                                        HorizontalLayout {
+                                            spacing: 10px;
+                                            FormInput { text <=> root.rental-cancel-reason; horizontal-stretch: 1; }
+                                            ActionButton { text: "Cancelar locação"; danger: true; clicked => { root.rental-cancel(); } }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= ENTREGADORES =================
+                if root.page == "deliverers" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 14px;
+                    PageHeader { heading: "Entregadores"; subtitle: "Cadastro das pessoas responsáveis pelas entregas"; }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        vertical-stretch: 1;
+
+                        Card {
+                            horizontal-stretch: 2;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 10px;
+                                HorizontalLayout {
+                                    Rectangle { horizontal-stretch: 1; }
+                                    ActionButton { text: "+ Novo entregador"; primary: true; clicked => { root.new-deliverer(); } }
+                                }
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "Nome"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Telefone"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 70px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.deliverers : ListRow {
+                                            selected: row.id == root.deliverer-id;
+                                            clicked => { root.select-deliverer(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.name; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.phone; width: 120px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 70px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.deliverers.length == 0 : Text {
+                                            text: "Nenhum entregador cadastrado.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Card {
+                            horizontal-stretch: 1;
+                            min-width: 300px;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 18px;
+                                    spacing: 10px;
+                                    SectionTitle { text: root.deliverer-id == "" ? "Novo entregador" : "Editar entregador"; }
+                                    HelpLabel { label: "Nome completo"; help: "Nome da pessoa que faz as entregas. Exemplo: Carlos Silva."; }
+                                    FormInput { text <=> root.deliverer-name; }
+                                    HelpLabel { label: "Telefone"; help: "Com DDD. Exemplo: (85) 98888-7777. É o contato usado na entrega."; }
+                                    FormInput { text <=> root.deliverer-phone; }
+                                    HelpLabel { label: "CPF"; help: "Opcional. Exemplo: 111.444.777-35."; }
+                                    FormInput { text <=> root.deliverer-document; }
+                                    HelpLabel { label: "Observações"; help: "Informações internas, como dias disponíveis ou veículo."; }
+                                    FormInput { text <=> root.deliverer-notes; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        ActionButton { text: "Salvar entregador"; primary: true; clicked => { root.save-deliverer(); } }
+                                        ActionButton { text: "Limpar campos"; clicked => { root.new-deliverer(); } }
+                                    }
+                                    ActionButton {
+                                        text: "Ativar / desativar";
+                                        enabled: root.deliverer-id != "";
+                                        clicked => { root.toggle-deliverer(root.deliverer-id); }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= ENTREGAS =================
+                if root.page == "deliveries" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Entregas"; subtitle: "Agenda, atribuição de entregadores e acompanhamento das entregas"; }
+
+                    Card {
+                        height: 84px;
+                        HorizontalLayout {
+                            padding: 14px;
+                            spacing: 16px;
+                            for card in root.delivery-panel : VerticalLayout {
+                                horizontal-stretch: 1;
+                                spacing: 2px;
+                                Text { text: card.value; font-size: 18px; font-weight: 700; color: Theme.text; }
+                                Text { text: card.label; font-size: 11px; color: Theme.text-muted; wrap: word-wrap; }
+                            }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        vertical-stretch: 1;
+
+                        Card {
+                            horizontal-stretch: 2;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 10px;
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    FormChoice {
+                                        model: ["Lista", "Agenda diária", "Agenda semanal"];
+                                        current-index <=> root.delivery-view-index;
+                                    }
+                                    FormInput {
+                                        placeholder-text: "Data dd/mm/aaaa (vazio = hoje)";
+                                        text <=> root.delivery-date;
+                                        horizontal-stretch: 1;
+                                    }
+                                    ActionButton { text: "Atualizar"; clicked => { root.search-deliveries(); } }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.deliveries : ListRow {
+                                            height: 58px;
+                                            selected: row.id == root.delivery-id;
+                                            clicked => { root.select-delivery(row.id); }
+                                            VerticalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                padding-top: 8px;
+                                                spacing: 2px;
+                                                Text { text: row.customer + " · " + row.schedule; overflow: elide; font-weight: 700; color: Theme.text; }
+                                                Text {
+                                                    text: row.status + " · " + row.deliverer + " · taxa " + row.fee;
+                                                    font-size: 12px;
+                                                    overflow: elide;
+                                                    color: Theme.text-muted;
+                                                }
+                                            }
+                                        }
+                                        if root.deliveries.length == 0 : Text {
+                                            text: "Nenhuma entrega no período.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if root.delivery-id == "" : Card {
+                            horizontal-stretch: 3;
+                            min-width: 340px;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 18px;
+                                    spacing: 8px;
+                                    SectionTitle { text: "Nova entrega a partir de pedido confirmado"; wrap: word-wrap; }
+                                    HelpLabel { label: "Pedido"; help: "Apenas pedidos confirmados com recebimento por entrega aparecem aqui."; }
+                                    FormChoice {
+                                        model: root.delivery-order-options;
+                                        current-index <=> root.delivery-new-order-index;
+                                    }
+                                    HelpLabel { label: "Telefone de contato"; help: "Deixe em branco para usar o telefone do cliente. Use outro número se quem recebe for diferente."; }
+                                    FormInput { text <=> root.delivery-new-phone; }
+                                    HorizontalLayout {
+                                        spacing: 10px;
+                                        VerticalLayout {
+                                            horizontal-stretch: 1;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Taxa de entrega"; help: "Valor cobrado pela entrega. Exemplo: 8,00. Use 0,00 se for grátis."; }
+                                            FormInput { text <=> root.delivery-new-fee; }
+                                        }
+                                        VerticalLayout {
+                                            horizontal-stretch: 2;
+                                            spacing: 6px;
+                                            HelpLabel { label: "Agendamento"; help: "Opcional. Data e hora combinadas. Formato: dd/mm/aaaa hh:mm. Se deixar em branco, agende depois."; }
+                                            FormInput { text <=> root.delivery-new-schedule; }
+                                        }
+                                    }
+                                    HelpLabel { label: "Observações"; help: "Instruções para o entregador. Exemplo: portão azul, ligar antes de chegar."; }
+                                    FormInput { text <=> root.delivery-new-notes; }
+                                    HorizontalLayout {
+                                        ActionButton { text: "Criar entrega"; primary: true; clicked => { root.create-delivery(); } }
+                                        Rectangle { horizontal-stretch: 1; }
+                                    }
+                                }
+                            }
+                        }
+
+                        if root.delivery-id != "" : Card {
+                            horizontal-stretch: 3;
+                            min-width: 340px;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 18px;
+                                    spacing: 10px;
+                                    SectionTitle { text: root.delivery-title; wrap: word-wrap; }
+                                    Rectangle {
+                                        min-height: 52px;
+                                        border-radius: 8px;
+                                        background: Theme.surface-header;
+                                        Text {
+                                            x: 12px;
+                                            width: parent.width - 24px;
+                                            height: parent.height;
+                                            vertical-alignment: center;
+                                            wrap: word-wrap;
+                                            font-size: 13px;
+                                            color: Theme.text;
+                                            text: root.delivery-details;
+                                        }
+                                    }
+
+                                    SectionTitle { text: "Histórico"; font-size: 13px; }
+                                    for line in root.delivery-history : Text {
+                                        text: line;
+                                        wrap: word-wrap;
+                                        font-size: 12px;
+                                        color: Theme.text-muted;
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    HelpLabel { label: "Agendar ou reagendar"; help: "Formato: dd/mm/aaaa hh:mm. Exemplo: 22/11/2026 09:00. Reagendar mantém o histórico das datas anteriores."; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        FormInput { text <=> root.delivery-schedule-text; horizontal-stretch: 1; }
+                                        ActionButton { text: "Agendar"; clicked => { root.schedule-delivery(); } }
+                                    }
+
+                                    HelpLabel { label: "Entregador"; help: "Quem vai levar a entrega. Só entregadores ativos aparecem na lista."; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        FormChoice {
+                                            model: root.deliverer-options;
+                                            current-index <=> root.delivery-deliverer-index;
+                                            horizontal-stretch: 1;
+                                        }
+                                        ActionButton { text: "Atribuir"; clicked => { root.assign-delivery(); } }
+                                    }
+                                    HorizontalLayout {
+                                        ActionButton { text: "Marcar como saiu para entrega"; primary: true; clicked => { root.depart-delivery(); } }
+                                        Rectangle { horizontal-stretch: 1; }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    HelpLabel { label: "Quem recebeu"; help: "Nome de quem recebeu a entrega. Exemplo: Ana Paula."; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        FormInput { text <=> root.delivery-received-by; }
+                                        FormInput { placeholder-text: "Observações (opcional)"; text <=> root.delivery-note; }
+                                    }
+                                    HorizontalLayout {
+                                        ActionButton { text: "Marcar como entregue"; primary: true; clicked => { root.complete-delivery(); } }
+                                        Rectangle { horizontal-stretch: 1; }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    HelpLabel { label: "Motivo (se não entregue ou cancelada)"; help: "Explique o problema. Exemplo: cliente ausente no endereço."; }
+                                    FormInput { text <=> root.delivery-reason; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        ActionButton { text: "Marcar como não entregue"; danger: true; clicked => { root.fail-delivery(); } }
+                                        ActionButton { text: "Cancelar entrega"; danger: true; clicked => { root.cancel-delivery(); } }
+                                    }
+                                    HorizontalLayout {
+                                        ActionButton { text: "Nova entrega"; clicked => { root.new-delivery(); } }
+                                        Rectangle { horizontal-stretch: 1; }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= ESTOQUE =================
+                if root.page == "stock" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 14px;
+                    PageHeader { heading: "Estoque"; subtitle: "Entradas, saídas e ajustes com histórico de movimentações"; }
+
+                    if root.stock-alert != "" : Rectangle {
+                        height: 36px;
+                        border-radius: 6px;
+                        background: Theme.warning-soft;
+                        Text {
+                            x: 12px;
+                            width: parent.width - 24px;
+                            height: parent.height;
+                            vertical-alignment: center;
+                            text: root.stock-alert;
+                            color: Theme.text-warning;
+                            font-weight: 600;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        vertical-stretch: 1;
+
+                        Card {
+                            horizontal-stretch: 3;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 10px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        spacing: 8px;
+                                        Text { text: "SKU"; width: 90px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Nome"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Estoque"; width: 70px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 110px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.stock-items : ListRow {
+                                            selected: row.id == root.stock-selected-id;
+                                            clicked => { root.select-stock-item(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                spacing: 8px;
+                                                Text { text: row.sku; width: 90px; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.name; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.stock; width: 70px; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 110px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.stock-items.length == 0 : Text {
+                                            text: "Nenhum produto cadastrado.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Card {
+                            horizontal-stretch: 2;
+                            min-width: 300px;
+                            ScrollView {
+                                VerticalLayout {
+                                    padding: 18px;
+                                    spacing: 8px;
+
+                                    SectionTitle { text: root.stock-selected-label; wrap: word-wrap; }
+                                    HelpLabel { label: "Quantidade"; help: "Entrada e saída: quantidade movimentada. Ajuste: contagem física atual. Exemplo: 5."; }
+                                    FormInput { text <=> root.stock-amount; }
+                                    HelpLabel { label: "Motivo"; help: "Obrigatório. Exemplo: compra fornecedor X, venda balcão, contagem mensal."; }
+                                    FormInput { text <=> root.stock-reason; }
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        ActionButton {
+                                            text: "Entrada";
+                                            primary: true;
+                                            enabled: root.stock-selected-id != "";
+                                            clicked => { root.stock-entry(); }
+                                        }
+                                        ActionButton {
+                                            text: "Saída";
+                                            enabled: root.stock-selected-id != "";
+                                            clicked => { root.stock-exit(); }
+                                        }
+                                        ActionButton {
+                                            text: "Ajuste";
+                                            enabled: root.stock-selected-id != "";
+                                            clicked => { root.stock-adjust(); }
+                                        }
+                                    }
+
+                                    Rectangle { height: 1px; background: Theme.border; }
+                                    SectionTitle { text: "Movimentações"; font-size: 13px; }
+                                    TableHead {
+                                        HorizontalLayout {
+                                            width: parent.width;
+                                            height: parent.height;
+                                            padding-left: 10px;
+                                            spacing: 6px;
+                                            Text { text: "Data"; width: 120px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Tipo"; width: 70px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Qtd."; width: 50px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Saldo"; width: 50px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                            Text { text: "Motivo"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        }
+                                    }
+                                    for movement in root.movements : ListRow {
+                                        height: 32px;
+                                        HorizontalLayout {
+                                            width: parent.width;
+                                            height: parent.height;
+                                            padding-left: 10px;
+                                            spacing: 6px;
+                                            Text { text: movement.occurred; width: 120px; font-size: 12px; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: movement.kind; width: 70px; font-size: 12px; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: movement.delta; width: 50px; font-size: 12px; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: movement.balance; width: 50px; font-size: 12px; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: movement.reason; horizontal-stretch: 1; font-size: 12px; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= CATEGORIAS =================
+                if root.page == "categories" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 14px;
+                    PageHeader { heading: "Categorias"; subtitle: "Organização dos produtos por grupo"; }
+
+                    HorizontalLayout {
+                        spacing: 16px;
+                        vertical-stretch: 1;
+
+                        Card {
+                            horizontal-stretch: 2;
+                            VerticalLayout {
+                                padding: 14px;
+                                spacing: 10px;
+                                TableHead {
+                                    HorizontalLayout {
+                                        width: parent.width;
+                                        height: parent.height;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        Text { text: "Nome"; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                        Text { text: "Situação"; width: 90px; font-size: 12px; font-weight: 700; color: Theme.text-muted; vertical-alignment: center; }
+                                    }
+                                }
+                                ScrollView {
+                                    vertical-stretch: 1;
+                                    VerticalLayout {
+                                        spacing: 2px;
+                                        for row in root.categories : ListRow {
+                                            selected: row.id == root.category-id;
+                                            clicked => { root.select-category(row.id); }
+                                            HorizontalLayout {
+                                                width: parent.width;
+                                                height: parent.height;
+                                                padding-left: 12px;
+                                                padding-right: 12px;
+                                                Text { text: row.name; horizontal-stretch: 1; vertical-alignment: center; color: Theme.text; }
+                                                Text { text: row.status; width: 90px; vertical-alignment: center; color: Theme.text; }
+                                            }
+                                        }
+                                        if root.categories.length == 0 : Text {
+                                            text: "Nenhuma categoria cadastrada.";
+                                            horizontal-alignment: center;
+                                            color: Theme.text-muted;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Card {
+                            horizontal-stretch: 1;
+                            min-width: 280px;
+                            VerticalLayout {
+                                padding: 18px;
+                                spacing: 8px;
+                                SectionTitle { text: root.category-id == "" ? "Nova categoria" : "Editar categoria"; }
+                                HelpLabel { label: "Nome"; help: "Nome do grupo. Exemplo: Mesas, Cadeiras, Decoração."; }
+                                FormInput { text <=> root.category-name; }
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    ActionButton { text: "Salvar"; primary: true; clicked => { root.save-category(); } }
+                                    ActionButton { text: "Limpar campos"; clicked => { root.new-category(); } }
+                                }
+                                ActionButton {
+                                    text: "Ativar / desativar";
+                                    enabled: root.category-id != "";
+                                    clicked => { root.toggle-category(root.category-id); }
+                                }
+                                Rectangle { vertical-stretch: 1; }
+                            }
+                        }
+                    }
+                }
+
+                // ================= RELATÓRIOS =================
+                if root.page == "reports" : VerticalLayout {
+                    vertical-stretch: 1;
+                    spacing: 12px;
+                    PageHeader { heading: "Relatórios"; subtitle: "Consultas gerenciais com exportação em CSV"; }
+
+                    Card {
+                        VerticalLayout {
+                            padding: 14px;
+                            spacing: 10px;
+                            HorizontalLayout {
+                                spacing: 10px;
+                                VerticalLayout {
+                                    horizontal-stretch: 3;
+                                    spacing: 6px;
+                                    HelpLabel { label: "Tipo de relatório"; help: "Escolha o que deseja analisar, como faturamento, produtos mais vendidos ou entregas."; }
+                                    FormChoice {
+                                        model: root.report-kind-options;
+                                        current-index <=> root.report-kind-index;
+                                    }
+                                }
+                                VerticalLayout {
+                                    horizontal-stretch: 1;
+                                    spacing: 6px;
+                                    HelpLabel { label: "De"; help: "Data inicial. Formato: dd/mm/aaaa. Deixe em branco para começar no primeiro dia do mês."; }
+                                    FormInput { placeholder-text: "dd/mm/aaaa"; text <=> root.report-from; }
+                                }
+                                VerticalLayout {
+                                    horizontal-stretch: 1;
+                                    spacing: 6px;
+                                    HelpLabel { label: "Até"; help: "Data final. Formato: dd/mm/aaaa. Deixe em branco para incluir até hoje."; }
+                                    FormInput { placeholder-text: "dd/mm/aaaa"; text <=> root.report-to; }
+                                }
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text {
+                                    text: "Relatórios de situação atual (pendências, atrasos, estoque) ignoram o período.";
+                                    font-size: 12px;
+                                    color: Theme.text-muted;
+                                    wrap: word-wrap;
+                                    vertical-alignment: center;
+                                    horizontal-stretch: 1;
+                                }
+                                ActionButton { text: "Gerar relatório"; primary: true; clicked => { root.generate-report(); } }
+                                ActionButton { text: "Exportar CSV"; clicked => { root.export-report(); } }
+                            }
+                        }
+                    }
+
+                    Card {
+                        vertical-stretch: 1;
+                        VerticalLayout {
+                            padding: 14px;
+                            spacing: 8px;
+                            SectionTitle { text: root.report-title; wrap: word-wrap; }
+                            Text { text: root.report-summary; font-size: 12px; color: Theme.text-muted; wrap: word-wrap; }
+                            for header in root.report-header : TableHead {
+                                HorizontalLayout {
+                                    width: parent.width;
+                                    height: parent.height;
+                                    padding-left: 12px;
+                                    padding-right: 12px;
+                                    spacing: 8px;
+                                    Text { text: header.c1; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; overflow: elide; vertical-alignment: center; }
+                                    Text { text: header.c2; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; overflow: elide; vertical-alignment: center; }
+                                    Text { text: header.c3; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; overflow: elide; vertical-alignment: center; }
+                                    Text { text: header.c4; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; overflow: elide; vertical-alignment: center; }
+                                    Text { text: header.c5; horizontal-stretch: 1; font-size: 12px; font-weight: 700; color: Theme.text-muted; overflow: elide; vertical-alignment: center; }
+                                }
+                            }
+                            ScrollView {
+                                vertical-stretch: 1;
+                                VerticalLayout {
+                                    spacing: 2px;
+                                    for row in root.report-rows : ListRow {
+                                        height: 32px;
+                                        HorizontalLayout {
+                                            width: parent.width;
+                                            height: parent.height;
+                                            padding-left: 12px;
+                                            padding-right: 12px;
+                                            spacing: 8px;
+                                            Text { text: row.c1; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: row.c2; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: row.c3; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: row.c4; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                            Text { text: row.c5; horizontal-stretch: 1; overflow: elide; vertical-alignment: center; color: Theme.text; }
+                                        }
+                                    }
+                                    if root.report-rows.length == 0 : Text {
+                                        text: "Gere um relatório para ver os dados.";
+                                        horizontal-alignment: center;
+                                        color: Theme.text-muted;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= CONFIGURAÇÕES =================
+                if root.page == "settings" : ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 14px;
+                        PageHeader { heading: "Configurações"; subtitle: "Armazenamento, backup e restauração dos dados"; }
+
+                        Card {
+                            VerticalLayout {
+                                padding: 18px;
+                                spacing: 10px;
+                                SectionTitle { text: "Armazenamento"; }
+                                InfoRow { label: "Pasta de dados"; value: root.settings-data-folder; }
+                                InfoRow { label: "Banco de dados"; value: root.settings-database-file; }
+                                InfoRow { label: "Pasta de backups"; value: root.settings-backups-folder; }
+                                InfoRow { label: "Pasta de exportações"; value: root.settings-exports-folder; }
+                                InfoRow { label: "Versão do esquema"; value: root.settings-schema-version; }
+                            }
+                        }
+
+                        Card {
+                            VerticalLayout {
+                                padding: 18px;
+                                spacing: 10px;
+                                SectionTitle { text: "Backup"; }
+                                Text {
+                                    text: "Cria uma cópia completa e verificada do banco. Mantenha cópias fora deste computador.";
+                                    font-size: 13px;
+                                    color: Theme.text-muted;
+                                    wrap: word-wrap;
+                                }
+                                HorizontalLayout {
+                                    ActionButton { text: "Criar backup agora"; primary: true; clicked => { root.create-backup(); } }
+                                    Rectangle { horizontal-stretch: 1; }
+                                }
+                            }
+                        }
+
+                        Card {
+                            VerticalLayout {
+                                padding: 18px;
+                                spacing: 10px;
+                                SectionTitle { text: "Restauração"; }
+                                Rectangle {
+                                    min-height: 44px;
+                                    border-radius: 8px;
+                                    background: Theme.warning-soft;
+                                    Text {
+                                        x: 12px;
+                                        width: parent.width - 24px;
+                                        height: parent.height;
+                                        vertical-alignment: center;
+                                        wrap: word-wrap;
+                                        font-size: 13px;
+                                        color: Theme.text-warning;
+                                        text: "A restauração substitui os dados atuais. O banco atual é guardado antes e só é trocado depois que o sistema for reiniciado.";
+                                    }
+                                }
+                                FieldLabel { text: "Backup a restaurar"; }
+                                FormChoice {
+                                    model: root.settings-backups;
+                                    current-index <=> root.settings-backup-index;
+                                }
+                                CheckBox {
+                                    text: "Entendo que os dados atuais serão substituídos";
+                                    checked <=> root.settings-restore-confirmed;
+                                }
+                                HorizontalLayout {
+                                    ActionButton {
+                                        text: "Preparar restauração";
+                                        danger: true;
+                                        enabled: root.settings-restore-confirmed && root.settings-backup-index >= 0;
+                                        clicked => { root.prepare-restore(); }
+                                    }
+                                    Rectangle { horizontal-stretch: 1; }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ================= PÁGINA NÃO ENCONTRADA =================
+                if root.page == "pending" : VerticalLayout {
+                    Text { text: "Tela não encontrada."; font-size: 16px; color: Theme.text; }
+                }
+            }
+        }
+    }
+}
